@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
@@ -52,13 +53,14 @@ class CrimeListFragment:Fragment() {
 
     //ViewHolder - класс обёртка для представление элемента
     //RecycledView не создаёт view сам по себе,он создаёт ViewHolder которые выводят свои itemView
-    private inner class CrimeHolder(view: View):RecyclerView.ViewHolder(view),View.OnClickListener{
+    private abstract class CrimeHolder(view: View) : RecyclerView.ViewHolder(view) {
+        var crime = Crime()
+        val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
+        val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
+    }
 
-        private lateinit var crime:Crime
-
-        private val titleTextView: TextView = itemView.findViewById(R.id.crime_title)
-        private val dateTextView: TextView = itemView.findViewById(R.id.crime_date)
-
+    //Холдер для обыденных преступлений
+    private inner class NormalCrimeHolder(view: View):CrimeHolder(view),View.OnClickListener{
         //присваиваем слушатель нажатий для всех элементов списка
         init {
             itemView.setOnClickListener(this)
@@ -75,15 +77,49 @@ class CrimeListFragment:Fragment() {
         }
     }
 
+    //Холдер для серьёзных преступлений
+    private inner class SeriousCrimeHolder(view: View):CrimeHolder(view),View.OnClickListener{
+        private val policeButton:Button = itemView.findViewById(R.id.call_police)
+
+        init {
+            itemView.setOnClickListener(this)
+        }
+
+        fun bind(crime: Crime){
+            this.crime = crime
+            titleTextView.text = this.crime.title
+            dateTextView.text = this.crime.date.toString()
+
+            //При нажатие на кпноку преступления выводится это сообщение
+            policeButton.setOnClickListener{
+                Toast.makeText(context,"Calling the Police",Toast.LENGTH_SHORT).show()
+            }
+        }
+        //При нажатие на само преступление выводится это сообщение
+        override fun onClick(v: View) {
+            Toast.makeText(context,"${crime.title} passed!" ,Toast.LENGTH_SHORT).show()
+        }
+    }
+
 
     //RecyclerView не создает ViewHolder сам по себе, вместо этого используется адаптер
     private inner class CrimeAdapter(var crimes:List<Crime>):RecyclerView.Adapter<CrimeHolder>(){
 
-
         //создание ViewHolder по запросу
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CrimeHolder {
-            val view = layoutInflater.inflate(R.layout.list_item_crime,parent,false)
-            return CrimeHolder(view)
+
+            //Если преступлние обыденное то надуваем старый макет и оборачиваем в сооветствующий холдер
+            return when(viewType){
+                0 -> {
+                    val view = layoutInflater.inflate(R.layout.list_item_crime,parent,false)
+                    NormalCrimeHolder(view)
+                }
+                else -> {
+                    val view = layoutInflater.inflate(R.layout.serious_list_item_crime,parent,false)
+                    SeriousCrimeHolder(view)
+                }
+
+            }
         }
 
         override fun getItemCount() = crimes.size
@@ -91,9 +127,23 @@ class CrimeListFragment:Fragment() {
         //связывание ViewHolder с данными из модельного слоя
         override fun onBindViewHolder(holder: CrimeHolder, position: Int) {
             val crime = crimes[position]
-            holder.bind(crime)
+            when (holder) {
+                is NormalCrimeHolder -> holder.bind(crime)
+                is SeriousCrimeHolder -> holder.bind(crime)
+                else -> throw IllegalArgumentException()
+            }
+        }
+
+        //Переопределяется в самом адаптере
+        override fun getItemViewType(position: Int): Int {
+            val crime = crimes[position]
+            return when (crime.requiresPolice) {
+                true -> 1
+                else -> 0
+            }
         }
     }
+
 
     companion object{
         fun newInstance():CrimeListFragment{
