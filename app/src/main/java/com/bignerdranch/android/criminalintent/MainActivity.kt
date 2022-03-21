@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity() {
 
         if (currentFragment == null){
             val fragment = CrimeListFragment.newInstance()
+            //val fragment = CrimeFragment() в менеджер фрагментов передаётся id контейнера и сам фрагмент
             supportFragmentManager
                 .beginTransaction()
                 .add(R.id.fragment_container,fragment)

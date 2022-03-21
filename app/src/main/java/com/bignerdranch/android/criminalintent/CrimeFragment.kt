@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent
 
+import android.os.Build
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -9,7 +10,10 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
 import android.widget.EditText
+import androidx.annotation.RequiresApi
 import androidx.fragment.app.Fragment
+import java.text.DateFormat
+import java.text.SimpleDateFormat
 
 class CrimeFragment:Fragment() {
     //Здесь происходит объявление переменных для дальнейшей инициализации
@@ -25,6 +29,7 @@ class CrimeFragment:Fragment() {
     }
 
     //Здесь происходит создание и заполнение представления фрагмента
+    @RequiresApi(Build.VERSION_CODES.N)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -36,7 +41,8 @@ class CrimeFragment:Fragment() {
         solvedCheckBox = view.findViewById(R.id.crime_solved) as CheckBox
 
         dateButton.apply {
-            text = crime.date.toString()
+            //text = crime.date.toString()
+            text = android.text.format.DateFormat.format("EEEE, MMM dd, yyyy.", crime.date)
             isEnabled = false
         }
         return view
