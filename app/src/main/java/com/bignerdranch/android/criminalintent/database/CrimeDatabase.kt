@@ -8,7 +8,7 @@ import com.bignerdranch.android.criminalintent.Crime
 
 //аннотация сообщает о том что класс представляет базу данных
 //аннотации требуется 2 параметра,список классов сущностей и версия бд
-@Database(entities = [Crime::class], version = 1)
+@Database(entities = [Crime::class], version = 1, exportSchema = false)
 //явно добавляем конвертер
 @TypeConverters(CrimeTypeConverters::class)
 abstract class CrimeDatabase:RoomDatabase() {

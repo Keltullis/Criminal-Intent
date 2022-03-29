@@ -1,5 +1,6 @@
 package com.bignerdranch.android.criminalintent.database
 
+import androidx.lifecycle.LiveData
 import androidx.room.Dao
 import androidx.room.Query
 import com.bignerdranch.android.criminalintent.Crime
@@ -11,8 +12,10 @@ import java.util.*
 interface CrimeDao {
     //Query указывает, что функции предназначены для извлечения информации из базы данных
     //а не вставки, обновления или удаления
+    //если DAO возвращает LiveData то Room автоматически выполнит запросы в фоновом режиме
+    //а затем обернёт в LiveData
     @Query("SELECT * FROM crime")
-    fun getCrimes():List<Crime>
+    fun getCrimes():LiveData<List<Crime>>
     @Query("SELECT * FROM crime WHERE id=(:id)")
-    fun getCrime(id:UUID):Crime?
+    fun getCrime(id:UUID):LiveData<Crime?>
 }
